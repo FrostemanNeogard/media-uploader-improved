@@ -255,8 +255,9 @@
                 <input type="text" id="customDestination" placeholder="Custom relative path (e.g. movies/My Movie (2024))">
             </div>
             <label class="field-label" for="subpathInput">Subfolder (optional)</label>
-            <input type="text" id="subpathInput" placeholder="e.g. Show Name/Season 1">
+            <input type="text" id="subpathInput" placeholder="e.g. Breaking Bad/Season 1">
             <span class="hint">Files are written to: &lt;base path&gt;/&lt;destination&gt;/&lt;subfolder&gt;/&lt;file&gt;.</span>
+            <span class="hint" id="destinationPreview"></span>
         </div>
 
         <div id="progressContainer">
@@ -288,6 +289,7 @@
     const subpathInput = document.getElementById('subpathInput');
     const folderModeCheckbox = document.getElementById('folderModeCheckbox');
     const fileList = document.getElementById('fileList');
+    const destinationPreview = document.getElementById('destinationPreview');
 
     const LS_API_KEY = 'mediaUploaderPluginApiKey'; // Eindeutiger Schlüssel für LocalStorage
     const LS_API_KEY_SAVE = 'mediaUploaderPluginApiKeySave'; // Speichert die "Save"-Präferenz
@@ -440,6 +442,11 @@
         updateFileList();
     }
 
+    function updateDestinationPreview() {
+        const previewText = `Files will be saved to: <base-path>/${getDestination()}`;
+        destinationPreview.textContent = previewText;
+    }
+
     // API Key beim Laden der Seite holen
     loadApiKey();
 
@@ -447,8 +454,10 @@
     folderModeCheckbox.checked = localStorage.getItem(LS_FOLDER_MODE) === 'true';
     applyFolderMode();
 
+    updateDestinationPreview();
     apiKeyInput.addEventListener('input', () => loadDestinations(apiKeyInput.value.trim()));
-    destinationSelect.addEventListener('change', updateCustomRow);
+    destinationSelect.addEventListener('change', () => {updateCustomRow(); updateDestinationPreview()});
+    subpathInput.addEventListener('change', updateDestinationPreview);
     folderModeCheckbox.addEventListener('change', applyFolderMode);
     saveApiKeyCheckbox.addEventListener('change', () => {
         localStorage.setItem(LS_API_KEY_SAVE, saveApiKeyCheckbox.checked ? 'true' : 'false');
