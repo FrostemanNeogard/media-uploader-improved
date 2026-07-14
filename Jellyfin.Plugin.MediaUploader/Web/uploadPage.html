@@ -109,7 +109,6 @@
         .hint { font-size: 0.8rem; color: var(--muted); margin-top: 6px; display: block; line-height: 1.4; }
         .warning { font-size: 0.8rem; color: #ffb86b; margin-top: 6px; display: block; line-height: 1.4; }
 
-        /* Dropzone */
         .dropzone {
             display: flex;
             flex-direction: column;
@@ -274,7 +273,6 @@
 </div>
 
 <script>
-    // Elemente referenzieren
     const apiKeyInput = document.getElementById('apiKey');
     const fileInput = document.getElementById('fileInput');
     const uploadButton = document.getElementById('uploadButton');
@@ -291,24 +289,21 @@
     const fileList = document.getElementById('fileList');
     const destinationPreview = document.getElementById('destinationPreview');
 
-    const LS_API_KEY = 'mediaUploaderPluginApiKey'; // Eindeutiger Schlüssel für LocalStorage
-    const LS_API_KEY_SAVE = 'mediaUploaderPluginApiKeySave'; // Speichert die "Save"-Präferenz
-    const LS_FOLDER_MODE = 'mediaUploaderPluginFolderMode'; // Speichert den Ordner-Modus
+    const LS_API_KEY = 'mediaUploaderPluginApiKey';
+    const LS_API_KEY_SAVE = 'mediaUploaderPluginApiKeySave';
+    const LS_FOLDER_MODE = 'mediaUploaderPluginFolderMode';
 
-    // --- Hilfsfunktion für Statusanzeige ---
     function showStatus(message, type = 'info') {
         statusDiv.textContent = message;
         statusDiv.className = `status-${type}`;
     }
 
-    // --- API Key Laden/Setzen ---
     function loadApiKey() {
         const savedKey = localStorage.getItem(LS_API_KEY);
         const savePref = localStorage.getItem(LS_API_KEY_SAVE);
         if (savedKey) {
             apiKeyInput.value = savedKey;
         }
-        // Restore the checkbox to the user's last choice (default: checked only if a key is stored)
         saveApiKeyCheckbox.checked = savePref === null ? !!savedKey : savePref === 'true';
         if (savedKey) {
             loadDestinations(savedKey);
@@ -325,7 +320,6 @@
         }
     }
 
-    // --- Destination Auswahl laden ---
     function loadDestinations(apiKey) {
         if (!apiKey) {
             populateDestinationSelect([]);
@@ -376,14 +370,12 @@
         return dest;
     }
 
-    // --- Dateifilter (nur im Ordner-Modus) ---
     const VIDEO_EXTENSIONS = ['mkv','mp4','avi','mov','wmv','ts','webm','m2ts','m4v','flv','mpg','mpeg','ogv'];
     function isVideoFile(name) {
         const ext = name.split('.').pop().toLowerCase();
         return VIDEO_EXTENSIONS.includes(ext);
     }
     function isTopLevelFile(file) {
-        // webkitRelativePath is like "Folder/file" for top-level items; subfolders add more segments.
         const rel = file.webkitRelativePath || '';
         return rel === '' || rel.split('/').length <= 2;
     }
@@ -392,11 +384,9 @@
         if (!folderModeCheckbox.checked) {
             return all;
         }
-        // Batch mode: only video files directly inside the selected folder (no subfolders).
         return all.filter(f => isTopLevelFile(f) && isVideoFile(f.name));
     }
 
-    // --- Dateiliste anzeigen ---
     function updateFileList() {
         const all = Array.from(fileInput.files || []);
         if (all.length === 0) {
@@ -428,7 +418,6 @@
         return div.innerHTML;
     }
 
-    // --- Folder mode toggle ---
     function applyFolderMode() {
         if (folderModeCheckbox.checked) {
             fileInput.setAttribute('webkitdirectory', '');
@@ -447,16 +436,14 @@
         destinationPreview.textContent = previewText;
     }
 
-    // API Key beim Laden der Seite holen
     loadApiKey();
 
-    // Ordner-Modus aus dem gespeicherten Zustand wiederherstellen (behebt Refresh-Konflikt)
     folderModeCheckbox.checked = localStorage.getItem(LS_FOLDER_MODE) === 'true';
     applyFolderMode();
 
     updateDestinationPreview();
     apiKeyInput.addEventListener('input', () => loadDestinations(apiKeyInput.value.trim()));
-    destinationSelect.addEventListener('change', () => {updateCustomRow(); updateDestinationPreview()});
+    destinationSelect.addEventListener('change', () => {updateCustomRow(); updateDestinationPreview();});
     subpathInput.addEventListener('change', updateDestinationPreview);
     folderModeCheckbox.addEventListener('change', applyFolderMode);
     saveApiKeyCheckbox.addEventListener('change', () => {
@@ -467,12 +454,10 @@
     });
     fileInput.addEventListener('change', updateFileList);
 
-    // --- Upload Button Klick-Event ---
     uploadButton.addEventListener('click', async () => {
         const apiKey = apiKeyInput.value.trim();
         const files = getSelectedFiles();
 
-        // --- Eingabevalidierung ---
         if (!apiKey) {
             showStatus('Error: Please enter an API Key.', 'error');
             apiKeyInput.focus();
@@ -484,11 +469,10 @@
             return;
         }
 
-        handleApiKeySave(apiKey); // API Key speichern/löschen
+        handleApiKeySave(apiKey);
 
         const destination = getDestination();
 
-        // --- UI Feedback ---
         statusDiv.style.display = 'block';
         progressContainer.style.display = 'block';
         progressBar.value = 0;
@@ -510,7 +494,6 @@
         showStatus(msg, failed.length ? 'error' : 'success');
     });
 
-    // Uploads files one at a time so very large or numerous uploads stay reliable and report progress per file.
     async function uploadAll(files, apiKey, destination) {
         const failed = [];
         for (let i = 0; i < files.length; i++) {

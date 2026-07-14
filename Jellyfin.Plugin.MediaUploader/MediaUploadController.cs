@@ -5,26 +5,23 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading; // Required for CancellationToken (used in commented out code)
+using System.Threading;
 using System.Threading.Tasks;
-using Jellyfin.Data.Enums; // Required for BaseItemKind
-using Jellyfin.Plugin.MediaUploader.Configuration; // Required for PluginConfiguration
+using Jellyfin.Data.Enums;
+using Jellyfin.Plugin.MediaUploader.Configuration;
 using MediaBrowser.Controller.Configuration;
-using MediaBrowser.Controller.Entities; // Required for CollectionFolder
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.IO;
-using MediaBrowser.Model.Querying; // Required for InternalItemsQuery
+using MediaBrowser.Model.Querying;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.MediaUploader
 {
-    /// <summary>
-    /// API Controller for handling media uploads.
-    /// </summary>
     [ApiController]
-    [Route("Plugins/MediaUploader")] // Base route for this controller
+    [Route("Plugins/MediaUploader")]
     public class MediaUploadController : ControllerBase
     {
         private readonly ILogger<MediaUploadController> _logger;
@@ -32,18 +29,10 @@ namespace Jellyfin.Plugin.MediaUploader
         private readonly IFileSystem _fileSystem;
         private readonly ILibraryManager _libraryManager;
 
-        // Debounce library scans so sequential per-file uploads don't queue a full scan each time.
         private static readonly TimeSpan ScanDebounceInterval = TimeSpan.FromSeconds(30);
         private static readonly object ScanLock = new object();
         private static DateTime _lastScanUtc = DateTime.MinValue;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MediaUploadController"/> class.
-        /// </summary>
-        /// <param name="logger">The logger instance.</param>
-        /// <param name="configurationManager">The server configuration manager instance.</param>
-        /// <param name="fileSystem">The file system abstraction instance.</param>
-        /// <param name="libraryManager">The library manager instance.</param>
         public MediaUploadController(
             ILogger<MediaUploadController> logger,
             IServerConfigurationManager configurationManager,
@@ -56,10 +45,6 @@ namespace Jellyfin.Plugin.MediaUploader
             _libraryManager = libraryManager;
         }
 
-        /// <summary>
-        /// Returns the configured destination presets for the upload page.
-        /// </summary>
-        /// <returns>A list of destination presets (name + path relative to the base upload path).</returns>
         [HttpGet("Destinations")]
         [Produces("application/json")]
         public IActionResult GetDestinations()
@@ -74,24 +59,16 @@ namespace Jellyfin.Plugin.MediaUploader
             return Ok(result);
         }
 
-        /// <summary>
-        /// Handles the file upload POST request.
-        /// Accepts one or more files via multipart/form-data (field name "files", or "file" for a single file)
-        /// and an optional "destination" field containing a path relative to the configured base upload directory.
-        /// Folder uploads preserve their relative structure via the file names provided by the browser.
-        /// </summary>
-        /// <returns>An IActionResult indicating the result of the upload operation.</returns>
-        [HttpPost("Upload")] // Route: /Plugins/MediaUploader/Upload
-        [RequestSizeLimit(10L * 1024 * 1024 * 1024)] // Explicit 10 GB total request limit
+        [HttpPost("Upload")]
+        [RequestSizeLimit(10L * 1024 * 1024 * 1024)]
         [RequestFormLimits(MultipartBodyLengthLimit = 10L * 1024 * 1024 * 1024)]
 #pragma warning disable SA1404
-        [SuppressMessage("Reliability", "CA2007:Aufruf von \"ConfigureAwait\" für erwarteten Task erwägen", Justification = "<Pending>")] // Matching high limit for multipart section (workaround)
+        [SuppressMessage("Reliability", "CA2007:Aufruf von \"ConfigureAwait\" für erwarteten Task erwägen", Justification = "<Pending>")]
 #pragma warning restore SA1404
         public async Task<IActionResult> UploadFile()
         {
             _logger.LogInformation("Media Uploader: UploadFile endpoint hit.");
 
-            // --- 1. Get and Validate Configuration ---
             var configuredPath = Plugin.Instance?.Configuration.UploadPath;
             if (string.IsNullOrEmpty(configuredPath))
             {
@@ -99,17 +76,14 @@ namespace Jellyfin.Plugin.MediaUploader
                 return StatusCode(StatusCodes.Status500InternalServerError, "Upload path is not configured in plugin settings.");
             }
 
-            // Resolve the base directory that everything must be written under.
             var baseDirectory = Path.GetFullPath(configuredPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
             _logger.LogInformation("Media Uploader: Using configured base directory: '{BaseDirectory}'", baseDirectory);
 
             try
             {
-                // --- 2. Read the multipart form data ---
                 var form = await Request.ReadFormAsync(CancellationToken.None).ConfigureAwait(false);
                 var formFiles = form.Files;
 
-                // Support both the multi-file field "files" and the legacy single-file field "file".
                 var files = formFiles.GetFiles("files").ToList();
                 var singleFile = formFiles.GetFile("file");
                 if (singleFile != null)
@@ -125,10 +99,8 @@ namespace Jellyfin.Plugin.MediaUploader
                     return BadRequest("No file uploaded.");
                 }
 
-                // Build the sanitized relative destination sub-path (e.g. "movies/My Movie (2024)").
                 var destinationRelative = BuildSafeRelativePath(destination);
 
-                // --- 3. Save each file, preserving relative folder structure ---
                 var uploaded = new List<string>();
                 var failed = new List<string>();
 
@@ -142,13 +114,11 @@ namespace Jellyfin.Plugin.MediaUploader
 
                     try
                     {
-                        // The browser may supply a relative path (folder uploads) inside the file name.
                         var fileRelative = BuildSafeRelativePath(file.FileName);
 
                         var fullTargetPath = Path.GetFullPath(Path.Combine(baseDirectory, destinationRelative, fileRelative));
                         var basePrefix = baseDirectory + Path.DirectorySeparatorChar;
 
-                        // Security Check: ensure the resolved path stays within the base directory.
                         if (!fullTargetPath.StartsWith(basePrefix, StringComparison.OrdinalIgnoreCase))
                         {
                             _logger.LogError(
@@ -188,8 +158,6 @@ namespace Jellyfin.Plugin.MediaUploader
                     return StatusCode(StatusCodes.Status500InternalServerError, "No files could be saved. Check server logs and permissions.");
                 }
 
-                // --- 4. Trigger a library scan (best effort, debounced) so new files are picked up ---
-                // Debounced because sequential per-file uploads would otherwise queue a full scan per file.
                 try
                 {
                     if (ShouldQueueLibraryScan())
@@ -201,10 +169,8 @@ namespace Jellyfin.Plugin.MediaUploader
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Media Uploader: Error requesting library validation.");
-                    // Don't fail the upload if the scan trigger fails.
                 }
 
-                // --- 5. Return a summary result ---
                 var result = new UploadResult
                 {
                     TotalFiles = files.Count,
@@ -217,28 +183,24 @@ namespace Jellyfin.Plugin.MediaUploader
 
                 return Ok(result);
             }
-            catch (IOException ioEx) // Handle specific IO errors during file operations
+            catch (IOException ioEx)
             {
                 _logger.LogError(ioEx, "Media Uploader: IO Error during upload process: {ErrorMessage}", ioEx.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, $"IO Error: {ioEx.Message}");
             }
-            catch (UnauthorizedAccessException authEx) // Handle permission errors
+            catch (UnauthorizedAccessException authEx)
             {
                 _logger.LogError(authEx, "Media Uploader: Permission denied during upload process: {ErrorMessage}", authEx.Message);
                 return StatusCode(StatusCodes.Status403Forbidden, $"Permission denied: {authEx.Message}");
             }
-            catch (Exception ex) // Catch-all for other unexpected errors
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Media Uploader: Unexpected error processing file upload: {ErrorMessage}", ex.Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, $"Unexpected error uploading file: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Serves the static HTML page for direct uploads.
-        /// </summary>
-        /// <returns>An HTML page as ContentResult.</returns>
-        [HttpGet("Page")] // Route: /Plugins/MediaUploader/Page
+        [HttpGet("Page")]
         [Produces("text/html")]
         public IActionResult GetUploadPage()
         {
@@ -246,7 +208,6 @@ namespace Jellyfin.Plugin.MediaUploader
             try
             {
                 var assembly = typeof(MediaUploadController).Assembly;
-                // Ensure this resource name exactly matches Namespace.Folder.FileName.ext
                 var resourceName = "Jellyfin.Plugin.MediaUploader.Web.uploadPage.html";
 
                 using var stream = assembly.GetManifestResourceStream(resourceName);
@@ -269,13 +230,6 @@ namespace Jellyfin.Plugin.MediaUploader
             }
         }
 
-        /// <summary>
-        /// Builds a sanitized, traversal-safe relative path from user supplied input.
-        /// Each path segment is run through <see cref="IFileSystem.GetValidFilename"/> and
-        /// combined without any ".." segments being able to escape the base directory.
-        /// </summary>
-        /// <param name="inputPath">The raw path supplied by the user or browser.</param>
-        /// <returns>A sanitized relative path, or an empty string when no input is given.</returns>
         private string BuildSafeRelativePath(string? inputPath)
         {
             if (string.IsNullOrWhiteSpace(inputPath))
@@ -294,11 +248,6 @@ namespace Jellyfin.Plugin.MediaUploader
             return Path.Combine(safeSegments.ToArray());
         }
 
-        /// <summary>
-        /// Returns true at most once per <see cref="ScanDebounceInterval"/> so that a burst of
-        /// uploads (e.g. one request per file) does not queue a full library scan for every file.
-        /// </summary>
-        /// <returns>True when a scan should be queued now.</returns>
         private static bool ShouldQueueLibraryScan()
         {
             var now = DateTime.UtcNow;
@@ -315,9 +264,6 @@ namespace Jellyfin.Plugin.MediaUploader
             return shouldQueue;
         }
 
-        /// <summary>
-        /// A named upload destination returned by the Destinations endpoint.
-        /// </summary>
         private sealed class DestinationInfo
         {
             public string Name { get; set; } = string.Empty;
@@ -325,9 +271,6 @@ namespace Jellyfin.Plugin.MediaUploader
             public string Path { get; set; } = string.Empty;
         }
 
-        /// <summary>
-        /// The summary returned after an upload request.
-        /// </summary>
         private sealed class UploadResult
         {
             public int TotalFiles { get; set; }

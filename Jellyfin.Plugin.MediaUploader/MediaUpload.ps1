@@ -1,32 +1,4 @@
-﻿<#
-.SYNOPSIS
-Testet den Jellyfin Media Uploader Plugin API-Endpunkt durch das Hochladen einer oder mehrerer Dateien.
-
-.DESCRIPTION
-Sendet eine POST-Anfrage mit einer oder mehreren Dateien (multipart/form-data) an den
-angegebenen Jellyfin Media Uploader Plugin Endpunkt. Baut den Body manuell auf
-für bessere Kompatibilität mit verschiedenen PowerShell-Versionen.
-
-.PARAMETER FilePaths
-Ein oder mehrere vollständige Pfade zu den hochzuladenden Mediendateien.
-
-.PARAMETER Destination
-(Optional) Relativer Zielpfad unterhalb des im Plugin konfigurierten Basispfads
-(z.B. "movies" oder "shows/Meine Serie/Staffel 1").
-
-.PARAMETER JellyfinUrl
-Die Basis-URL deiner Jellyfin Instanz (z.B. "http://localhost:8096").
-
-.PARAMETER ApiKey
-Dein Jellyfin API-Schlüssel zur Authentifizierung.
-
-.EXAMPLE
-.\MediaUpload.ps1 -FilePaths "C:\pfad\film.mkv","C:\pfad\film2.mkv" -Destination "movies"
-
-.EXAMPLE
-.\MediaUpload.ps1 -FilePaths "C:\pfad\episode.mkv" -Destination "shows/Meine Serie/Staffel 1" -JellyfinUrl "http://192.168.1.100:8096"
-#>
-param(
+﻿param(
     [Parameter(Mandatory=$true)]
     [string[]]$FilePaths,
 
@@ -40,18 +12,15 @@ param(
     [string]$ApiKey = "f5e9519d0d9b42649d77b76a82d8e46f"
 )
 
-# Ziel-URL zusammenbauen
 $uploadUrl = "$($JellyfinUrl.TrimEnd('/'))/Plugins/MediaUploader/Upload"
 
-# Prüfen, ob alle Dateien existieren
 foreach ($fp in $FilePaths) {
     if (-not (Test-Path -Path $fp -PathType Leaf)) {
         Write-Error "Datei nicht gefunden: $fp"
-        return # Skript beenden
+        return
     }
 }
 
-# Header vorbereiten
 $headers = @{}
 if (-not [string]::IsNullOrEmpty($ApiKey)) {
     $headers.Add("X-Emby-Token", $ApiKey)
@@ -66,14 +35,12 @@ if (-not [string]::IsNullOrEmpty($Destination)) {
 
 Write-Host "Versuche $($FilePaths.Count) Datei(en) nach '$uploadUrl' hochzuladen..."
 
-# --- Multipart/form-data Body manuell erstellen ---
 $boundary = "---------------------------$([System.Guid]::NewGuid().ToString())"
 $contentType = "multipart/form-data; boundary=$boundary"
-$LF = "`r`n" # Zeilenumbruch für HTTP
+$LF = "`r`n"
 
 $bodyBytes = [System.Collections.Generic.List[byte]]::new()
 
-# 1) Das "destination" Feld anhängen (falls gesetzt)
 if (-not [string]::IsNullOrEmpty($Destination)) {
     $destHeader = @(
         "--$boundary",
@@ -84,7 +51,6 @@ if (-not [string]::IsNullOrEmpty($Destination)) {
     $bodyBytes.AddRange([System.Text.Encoding]::UTF8.GetBytes($destHeader + $LF))
 }
 
-# 2) Jede Datei als eigenen "files" Part anhängen
 foreach ($fp in $FilePaths) {
     $fileItem = Get-Item -Path $fp
     try {
@@ -94,7 +60,6 @@ foreach ($fp in $FilePaths) {
          return
     }
 
-    # MIME-Typ bestimmen (Basis-Erkennung, kann verbessert werden)
     $mimeType = switch ($fileItem.Extension.ToLower()) {
         ".mkv"  { "video/x-matroska" }
         ".mp4"  { "video/mp4" }
@@ -106,12 +71,11 @@ foreach ($fp in $FilePaths) {
         ".mp3"  { "audio/mpeg" }
         ".flac" { "audio/flac" }
         ".wav"  { "audio/wav" }
-        default { "application/octet-stream" } # Standard-Binärtyp
+        default { "application/octet-stream" }
     }
 
     $fileHeader = @(
         "--$boundary",
-        # Der Parametername 'files' muss mit dem im C# Controller übereinstimmen
         "Content-Disposition: form-data; name=`"files`"; filename=`"$($fileItem.Name)`"",
         "Content-Type: $mimeType",
         ""
@@ -122,14 +86,10 @@ foreach ($fp in $FilePaths) {
     $bodyBytes.AddRange([System.Text.Encoding]::UTF8.GetBytes($LF))
 }
 
-# 3) Abschließendes Boundary anhängen
 $bodyBytes.AddRange([System.Text.Encoding]::UTF8.GetBytes("--$boundary--" + $LF))
 
 $finalBody = $bodyBytes.ToArray()
-# --- Ende Body-Erstellung ---
 
-
-# Stoppuhr für die Zeitmessung
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
 try {
@@ -146,7 +106,6 @@ try {
     Write-Error "Fehler während der Web-Anfrage (Dauer: $($stopwatch.Elapsed.TotalSeconds)s):"
     Write-Error $_.Exception.Message
 
-    # Versuche, Statuscode und Antwort aus der Exception zu extrahieren
     $statusCode = $null
     $errorContent = $null
     if ($_.Exception.Response) {

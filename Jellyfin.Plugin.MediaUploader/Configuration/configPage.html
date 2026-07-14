@@ -66,30 +66,19 @@
                 </p>
 
             </form> </div> </div> <script type="text/javascript">
-    // Use a unique name for your plugin's config interaction object
     var MediaUploaderConfig = {
-        pluginUniqueId: '514d4276-bf23-4a85-b074-66b4cd38fd90' // Your Plugin GUID
+        pluginUniqueId: '514d4276-bf23-4a85-b074-66b4cd38fd90'
     };
 
-    // Function to load the configuration data into the form
     function loadConfig(pageElement) {
-        Dashboard.showLoadingMsg(); // Show loading indicator
+        Dashboard.showLoadingMsg();
         ApiClient.getPluginConfiguration(MediaUploaderConfig.pluginUniqueId).then(function (config) {
-            // Populate the input field with the loaded value
-            pageElement.querySelector('#txtUploadPath').value = config.UploadPath || ''; // Use empty string as fallback
-
-            // Render the destinations list
+            pageElement.querySelector('#txtUploadPath').value = config.UploadPath || '';
             renderDestinations(pageElement, config.Destinations || []);
-
-            // (Optional) Dynamically adjust the displayed link if needed?
-            // Usually the relative link /Plugins/... is correct.
-            // pageElement.querySelector('#uploadPageLink').href = ApiClient.serverAddress() + '/Plugins/MediaUploader/Page';
-
-            Dashboard.hideLoadingMsg(); // Hide loading indicator
+            Dashboard.hideLoadingMsg();
         });
     }
 
-    // Renders the editable list of destination presets
     function renderDestinations(pageElement, destinations) {
         var container = pageElement.querySelector('#destinationsList');
         container.innerHTML = '';
@@ -140,7 +129,6 @@
         });
     }
 
-    // Reads the current destinations from the DOM
     function readDestinations(pageElement) {
         var rows = pageElement.querySelectorAll('#destinationsList .destRow');
         var result = [];
@@ -152,23 +140,17 @@
         return result;
     }
 
-    // Function to save the configuration data from the form
     function saveConfig(pageElement) {
         Dashboard.showLoadingMsg();
-        // Get current config first (to preserve other potential settings)
         ApiClient.getPluginConfiguration(MediaUploaderConfig.pluginUniqueId).then(function (config) {
-            // Read the value from the input field and update the config object
             config.UploadPath = pageElement.querySelector('#txtUploadPath').value;
             config.Destinations = readDestinations(pageElement);
-
-            // Send the updated configuration back to the server
             ApiClient.updatePluginConfiguration(MediaUploaderConfig.pluginUniqueId, config).then(function (result) {
-                Dashboard.processPluginConfigurationUpdateResult(result); // Show standard success/error toast
+                Dashboard.processPluginConfigurationUpdateResult(result);
             });
         });
     }
 
-    // Add destination button
     document.querySelector('#addDestination').addEventListener('click', function () {
         var pageElement = this.closest('.page');
         var list = readDestinations(pageElement);
@@ -176,20 +158,14 @@
         renderDestinations(pageElement, list);
     });
 
-    // Event listener for when the configuration page is shown
     document.querySelector('#mediaUploaderConfigPage').addEventListener('pageshow', function () {
-        // 'this' refers to the page element (#mediaUploaderConfigPage) in this context
         loadConfig(this);
     });
 
-    // Event listener for the form submission
     document.querySelector('#mediaUploaderConfigForm').addEventListener('submit', function (e) {
-        // 'this' refers to the form element (#mediaUploaderConfigForm)
-        // Find the parent page element to pass to saveConfig
         var pageElement = this.closest('.page');
         saveConfig(pageElement);
-
-        e.preventDefault(); // Prevent the default form submission behavior
+        e.preventDefault();
         return false;
     });
 </script>
