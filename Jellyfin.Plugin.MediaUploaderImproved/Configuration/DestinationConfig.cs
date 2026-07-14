@@ -1,4 +1,4 @@
-namespace Jellyfin.Plugin.MediaUploader.Configuration;
+namespace Jellyfin.Plugin.MediaUploaderImproved.Configuration;
 
 public class DestinationConfig
 {

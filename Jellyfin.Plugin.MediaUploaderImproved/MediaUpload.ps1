@@ -12,7 +12,7 @@
     [string]$ApiKey = "f5e9519d0d9b42649d77b76a82d8e46f"
 )
 
-$uploadUrl = "$($JellyfinUrl.TrimEnd('/'))/Plugins/MediaUploader/Upload"
+$uploadUrl = "$($JellyfinUrl.TrimEnd('/'))/Plugins/MediaUploaderImproved/Upload"
 
 foreach ($fp in $FilePaths) {
     if (-not (Test-Path -Path $fp -PathType Leaf)) {

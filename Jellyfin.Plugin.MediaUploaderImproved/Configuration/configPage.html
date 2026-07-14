@@ -12,7 +12,7 @@
             <form id="mediaUploaderConfigForm">
                 <div style="display: flex; justify-content: space-between;">
                     <h2>Media Uploader Improved Plugin Settings</h2>
-                    <a href="/Plugins/MediaUploader/Page" target="_blank" class="raised button-submit block emby-button" style="width: 30%; line-height: 2em">Go to Upload Page</a>
+                    <a href="/Plugins/MediaUploaderImproved/Page" target="_blank" class="raised button-submit block emby-button" style="width: 30%; line-height: 2em">Go to Upload Page</a>
                 </div>
 
                 <div class="inputContainer">
@@ -43,16 +43,16 @@
                 <hr style="margin: 3em 0;" />
                 <div style="display: flex; justify-content: space-between;">
                     <h2>Upload Page</h2>
-                    <a href="/Plugins/MediaUploader/Page" target="_blank" class="raised button-submit block emby-button" style="width: 30%; line-height: 2em">Go to Upload Page</a>
+                    <a href="/Plugins/MediaUploaderImproved/Page" target="_blank" class="raised button-submit block emby-button" style="width: 30%; line-height: 2em">Go to Upload Page</a>
                 </div>
                 <p>
-                    Click on the "Go to Upload Page" button (or navigate to <a id="uploadPageLink" href="/Plugins/MediaUploader/Page" target="_blank" style="word-break: break-all;">/Plugins/MediaUploader/Page</a>) to visit the page where you upload media.
+                    Click on the "Go to Upload Page" button (or navigate to <a id="uploadPageLink" href="/Plugins/MediaUploaderImproved/Page" target="_blank" style="word-break: break-all;">/Plugins/MediaUploaderImproved/Page</a>) to visit the page where you upload media.
                     This page allows non-admin users to upload files using their personal API Key. You may want to bookmark this link for easy access.
                 </p>
                 <h3>How to use the Upload Page:</h3>
                 <ol style="padding-left: 25px;">
                     <li style="margin-bottom: 10px;">
-                        <strong>Generate an API Key:</strong> Each user needs their own API Key. Go to your Jellyfin user profile (click profile icon top right) &rarr; Settings &rarr; API Keys &rarr; Click the '+' icon to create a new key. Give it a descriptive name (e.g., "MediaUploader Key") and copy the generated key value.
+                        <strong>Generate an API Key:</strong> Each user needs their own API Key. Go to your Jellyfin user profile (click profile icon top right) &rarr; Settings &rarr; API Keys &rarr; Click the '+' icon to create a new key. Give it a descriptive name (e.g., "MediaUploaderImproved Key") and copy the generated key value.
                     </li>
                     <li style="margin-bottom: 10px;">
                         <strong>Go to the Upload Page:</strong> Click the "Go to Upload Page" button or open the link above. Paste your generated API Key into the designated field. Select the media file(s) (or alternatively a directory containing media files) that you want to upload. Specify where you want to save them using the "Destination" field, and optionally the "Subfolder" field.</li>
@@ -66,13 +66,13 @@
                 </p>
 
             </form> </div> </div> <script type="text/javascript">
-    var MediaUploaderConfig = {
+    var MediaUploaderImprovedConfig = {
         pluginUniqueId: 'ec712ab4-8ecb-4d34-8087-09db56f33d44'
     };
 
     function loadConfig(pageElement) {
         Dashboard.showLoadingMsg();
-        ApiClient.getPluginConfiguration(MediaUploaderConfig.pluginUniqueId).then(function (config) {
+        ApiClient.getPluginConfiguration(MediaUploaderImprovedConfig.pluginUniqueId).then(function (config) {
             pageElement.querySelector('#txtUploadPath').value = config.UploadPath || '';
             renderDestinations(pageElement, config.Destinations || []);
             Dashboard.hideLoadingMsg();
@@ -142,10 +142,10 @@
 
     function saveConfig(pageElement) {
         Dashboard.showLoadingMsg();
-        ApiClient.getPluginConfiguration(MediaUploaderConfig.pluginUniqueId).then(function (config) {
+        ApiClient.getPluginConfiguration(MediaUploaderImprovedConfig.pluginUniqueId).then(function (config) {
             config.UploadPath = pageElement.querySelector('#txtUploadPath').value;
             config.Destinations = readDestinations(pageElement);
-            ApiClient.updatePluginConfiguration(MediaUploaderConfig.pluginUniqueId, config).then(function (result) {
+            ApiClient.updatePluginConfiguration(MediaUploaderImprovedConfig.pluginUniqueId, config).then(function (result) {
                 Dashboard.processPluginConfigurationUpdateResult(result);
             });
         });

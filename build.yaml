@@ -12,7 +12,7 @@ description: >
 category: "General"
 owner: "FrostemanNeogard"
 artifacts:
-- "Jellyfin.Plugin.MediaUploader.dll"
+- "Jellyfin.Plugin.MediaUploaderImproved.dll"
 changelog: >
   - Multiple file uploads and folder (batch) uploads
   - Configurable base upload path with user-defined destination presets

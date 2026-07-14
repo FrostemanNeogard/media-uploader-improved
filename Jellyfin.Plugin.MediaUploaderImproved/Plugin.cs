@@ -1,9 +1,9 @@
-namespace Jellyfin.Plugin.MediaUploader;
+namespace Jellyfin.Plugin.MediaUploaderImproved;
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Jellyfin.Plugin.MediaUploader.Configuration;
+using Jellyfin.Plugin.MediaUploaderImproved.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;

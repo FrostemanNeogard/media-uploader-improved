@@ -4,7 +4,7 @@ A plugin for [Jellyfin](https://jellyfin.org) that lets users upload media files
 
 ## Overview
 
-This plugin provides a **standalone upload page** (`/Plugins/MediaUploader/Page`) with an interactive UI to allow users to effortlessly upload their media from their local device to their Jellyfin server.
+This plugin provides a **standalone upload page** (`/Plugins/MediaUploaderImproved/Page`) with an interactive UI to allow users to effortlessly upload their media from their local device to their Jellyfin server.
 
 Uploads are written under a configurable **base path**, into a chosen **destination** (with an optional **subfolder**). This makes it easy to drop files straight into the right library folder (e.g. `/media/movies` or `/media/shows`).
 
@@ -24,16 +24,16 @@ Uploads are written under a configurable **base path**, into a chosen **destinat
 2. For the **"Repository Name"** field, set it to anything you want (e.g. "Media Uploader Improved").
 3. For the **"Repository URL"** field, enter the following URL: 
    ```
-   https://raw.githubusercontent.com/FrostemanNeogard/MediaUploader/main/manifest.json
+   https://raw.githubusercontent.com/FrostemanNeogard/MediaUploaderImproved/main/manifest.json
    ```
 4. Click **"Add"** to save your new repository, then head back to the **Plugins** tab. Refresh, search for **Media Uploader Improved**, and click **Install**.
 5. Restart your Jellyfin server when prompted.
 
 **Method B — Manual Installation**
 
-1. Build the plugin (see below) or download `Jellyfin.Plugin.MediaUploader_1.0.0.0.zip` from the [releases page](https://github.com/FrostemanNeogard/MediaUploader/releases).
+1. Build the plugin (see below) or download `Jellyfin.Plugin.MediaUploaderImproved_1.0.0.0.zip` from the [releases page](https://github.com/FrostemanNeogard/MediaUploader/releases).
 2. **Stop** your Jellyfin server.
-3. Create a folder named `Jellyfin.Plugin.MediaUploader` inside your server's plugins directory:
+3. Create a folder named `Jellyfin.Plugin.MediaUploaderImproved` inside your server's plugins directory:
    * **Windows:** `C:\ProgramData\Jellyfin\Server\plugins`
    * **Linux (package):** `/var/lib/jellyfin/plugins`
    * **Docker:** typically `/config/plugins` inside the container
@@ -52,7 +52,7 @@ After installing and restarting:
 
 ## Usage
 
-1. Open the upload page link from the plugin settings, either via the **"Go to Upload Page"** button, or by navigation to `{your_jellyfin_url}/Plugins/MediaUploader/Page`.
+1. Open the upload page link from the plugin settings, either via the **"Go to Upload Page"** button, or by navigation to `{your_jellyfin_url}/Plugins/MediaUploaderImproved/Page`.
 2. **API Key**: paste a personal Jellyfin API key. You can get this by navigating to (Jellyfin Dashboard → API Keys → **+ New API Key**). Give it a fitting name, for example "media uploader improved".
    * <span style="color:red;">**Security Warning:**</span> saving the key in local storage on the Upload Page is less secure; only do this on trusted, private computers. It is recommended to store this somewhere safe instead.
 3. **Files**: click to choose one or more files. Enable **Batch upload a folder** if you **instead** want to upload the top-level video files of a selected folder (subfolders and non-video files are skipped).
@@ -68,7 +68,7 @@ After installing and restarting:
 dotnet restore
 dotnet build -c Release
 ```
-The plugin DLL is at `bin/Release/net8.0/Jellyfin.Plugin.MediaUploader.dll`. Zip it (or just the DLL) and install as described in Method B.
+The plugin DLL is at `bin/Release/net8.0/Jellyfin.Plugin.MediaUploaderImproved.dll`. Zip it (or just the DLL) and install as described in Method B.
 
 ## Contributing
 

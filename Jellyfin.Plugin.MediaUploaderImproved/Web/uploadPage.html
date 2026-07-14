@@ -289,9 +289,9 @@
     const fileList = document.getElementById('fileList');
     const destinationPreview = document.getElementById('destinationPreview');
 
-    const LS_API_KEY = 'mediaUploaderPluginApiKey';
-    const LS_API_KEY_SAVE = 'mediaUploaderPluginApiKeySave';
-    const LS_FOLDER_MODE = 'mediaUploaderPluginFolderMode';
+    const LS_API_KEY = 'mediaUploaderImprovedPluginApiKey';
+    const LS_API_KEY_SAVE = 'mediaUploaderImprovedPluginApiKeySave';
+    const LS_FOLDER_MODE = 'mediaUploaderImprovedPluginFolderMode';
 
     function showStatus(message, type = 'info') {
         statusDiv.textContent = message;
@@ -325,7 +325,7 @@
             populateDestinationSelect([]);
             return;
         }
-        const url = '/Plugins/MediaUploader/Destinations';
+        const url = '/Plugins/MediaUploaderImproved/Destinations';
         fetch(url, { headers: { 'X-Emby-Token': apiKey } })
             .then(res => res.ok ? res.json() : [])
             .then(data => populateDestinationSelect(Array.isArray(data) ? data : []))
@@ -548,7 +548,7 @@
                 reject(new Error('Network error or server unreachable.'));
             });
 
-            xhr.open('POST', '/Plugins/MediaUploader/Upload', true);
+            xhr.open('POST', '/Plugins/MediaUploaderImproved/Upload', true);
             xhr.setRequestHeader('X-Emby-Token', apiKey);
             xhr.send(formData);
         });

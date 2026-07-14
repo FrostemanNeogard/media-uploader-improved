@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
-using Jellyfin.Plugin.MediaUploader.Configuration;
+using Jellyfin.Plugin.MediaUploaderImproved.Configuration;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
@@ -18,10 +18,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace Jellyfin.Plugin.MediaUploader
+namespace Jellyfin.Plugin.MediaUploaderImproved
 {
     [ApiController]
-    [Route("Plugins/MediaUploader")]
+    [Route("Plugins/MediaUploaderImproved")]
     public class MediaUploadController : ControllerBase
     {
         private readonly ILogger<MediaUploadController> _logger;
@@ -208,7 +208,7 @@ namespace Jellyfin.Plugin.MediaUploader
             try
             {
                 var assembly = typeof(MediaUploadController).Assembly;
-                var resourceName = "Jellyfin.Plugin.MediaUploader.Web.uploadPage.html";
+                var resourceName = "Jellyfin.Plugin.MediaUploaderImproved.Web.uploadPage.html";
 
                 using var stream = assembly.GetManifestResourceStream(resourceName);
 
