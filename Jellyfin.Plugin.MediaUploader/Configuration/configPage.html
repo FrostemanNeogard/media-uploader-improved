@@ -7,17 +7,13 @@
 <body>
 <div id="mediaUploaderConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-linkbutton">
 
-    <div data-role="header" data-position="fixed" class="header-fixed">
-        <a is="emby-linkbutton" class="button-icon headerButton headerButton-settings" href="/web/index.html#!/dashboard.html">
-            <span class="material-icons keyboard_backspace" aria-hidden="true"></span>
-        </a>
-        <h3 class="headerTitle">Media Uploader Settings</h3>
-    </div>
-
     <div data-role="content">
         <div class="content-primary">
             <form id="mediaUploaderConfigForm">
-                <h2>Plugin Settings</h2>
+                <div style="display: flex; justify-content: space-between;">
+                    <h2>Media Uploader Plugin Settings</h2>
+                    <a href="/Plugins/MediaUploader/Page" target="_blank" class="raised button-submit block emby-button" style="width: 30%; line-height: 2em">Go to Upload Page</a>
+                </div>
 
                 <div class="inputContainer">
                     <label class="inputLabel inputLabelUnfocused" for="txtUploadPath">Base Upload Path:</label>
@@ -30,7 +26,7 @@
 
                 <h2>Destinations</h2>
                 <p class="fieldDescription">
-                    These presets appear as a dropdown on the upload page. Each <strong>Path</strong> is relative to the Base Upload Path above
+                    These presets appear as a dropdown on the upload page. Each path is relative to the Base Upload Path above
                     (e.g. with a base of <code>/media</code>, a path of <code>movies</code> resolves to <code>/media/movies</code>).
                 </p>
                 <div id="destinationsList"></div>
@@ -44,30 +40,37 @@
                     </button>
                 </div>
 
-                <hr style="margin: 3em 0;" /> <h2>Direct Upload Page</h2>
+                <hr style="margin: 3em 0;" />
+                <div style="display: flex; justify-content: space-between;">
+                    <h2>Upload Page</h2>
+                    <a href="/Plugins/MediaUploader/Page" target="_blank" class="raised button-submit block emby-button" style="width: 30%; line-height: 2em">Go to Upload Page</a>
+                </div>
                 <p>
-                    Use the following link to access the direct upload page. This page allows non-admin users to upload files using their personal API Key.
+                    Click on the "Go to Upload Page" button (or navigate to <a id="uploadPageLink" href="/Plugins/MediaUploader/Page" target="_blank" style="word-break: break-all;"></a>) to visit the page where you upload media.
+                    This page allows non-admin users to upload files using their personal API Key.
                 </p>
                 <p>
-                    <strong>Link:</strong> <a id="uploadPageLink" href="/Plugins/MediaUploader/Page" target="_blank" style="word-break: break-all;">/Plugins/MediaUploader/Page</a>
-                </p>
-                <p>
-                    <em>Suggestion: Bookmark this link for easy access.</em>
+                    <em>You may want to bookmark this link for easy access.</em>
                 </p>
 
-                <h3>How to Use the Upload Page:</h3>
+                <h3>How to use the Upload Page:</h3>
                 <ol style="padding-left: 25px;">
                     <li style="margin-bottom: 10px;">
-                        <strong>Generate an API Key:</strong> Each user needs their own API Key. Go to your user profile (click profile icon top right) &rarr; Settings &rarr; API Keys &rarr; Click the '+' icon to create a new key. Give it a descriptive name (e.g., "MediaUploader Key") and copy the generated key value.
+                        <strong>Generate an API Key:</strong> Each user needs their own API Key. Go to your Jellyfin user profile (click profile icon top right) &rarr; Settings &rarr; API Keys &rarr; Click the '+' icon to create a new key. Give it a descriptive name (e.g., "MediaUploader Key") and copy the generated key value.
                     </li>
                     <li style="margin-bottom: 10px;">
-                        <strong>Use the Upload Page:</strong> Open the link above. Paste your generated API Key into the designated field. Select the media file you want to upload and click "Start Upload". </li>
-                    <li style="margin-bottom: 10px;">
-                        <strong>API Key Storage (Security Warning):</strong> For convenience, the upload page can save the entered API Key in your browser's local storage, so you don't have to enter it every time.
-                        <br>
-                        <strong style="color: #d9534f;">Warning:</strong> Saving API Keys in local storage is less secure and only recommended for trusted home environments on private computers. **Do not** use this feature on public or shared computers. For professional settings or higher security, it's better to use a password manager to store the key and paste it each time.
+                        <strong>Go to the Upload Page:</strong> Click the "Go to Upload Page" button or open the link above. Paste your generated API Key into the designated field. Select the media file(s) (or alternatively a directory containing media files) that you want to upload. Specify where you want to save them using the "Destination" field, and optionally the "Subfolder" field.</li>
+                    <li stlye="margin-bottom: 10px;">
+                        <strong>Upload your files:</strong> Click the "Upload" button to begin your upload(s). If you selected multiple files or a directory, your files will upload one by one with a progress bar for each file.
+                    </li>
+                    <li stlye="margin-bottom: 10px;">
+                        <strong>Upload your files:</strong> Click the "Upload" button to begin your upload(s). If you selected multiple files or a directory, your files will upload one by one with a progress bar for each file. Note that if you upload a directory, any non-video files and any files in subdirectories will be ignored.
                     </li>
                 </ol>
+
+                <p>
+                    Congratulations! Your new media is now accessible on your server.
+                </p>
 
             </form> </div> </div> <script type="text/javascript">
     // Use a unique name for your plugin's config interaction object
@@ -114,6 +117,7 @@
             nameInput.dataset.index = index;
             nameInput.dataset.field = 'Name';
             nameInput.style.flex = '1';
+            nameInput.style.padding = '1em';
 
             var pathInput = document.createElement('input');
             pathInput.type = 'text';
@@ -123,6 +127,7 @@
             pathInput.dataset.index = index;
             pathInput.dataset.field = 'Path';
             pathInput.style.flex = '1';
+            pathInput.style.padding = '1em';
 
             var removeBtn = document.createElement('button');
             removeBtn.type = 'button';

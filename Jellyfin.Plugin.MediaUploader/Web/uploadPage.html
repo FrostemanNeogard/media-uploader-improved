@@ -227,20 +227,6 @@
         </div>
 
         <div class="section">
-            <h2>Destination</h2>
-            <label class="field-label" for="destinationSelect">Destination</label>
-            <select id="destinationSelect">
-                <option value="">Loading destinations...</option>
-            </select>
-            <div id="customDestinationRow">
-                <input type="text" id="customDestination" placeholder="Custom relative path (e.g. movies/My Movie (2024))">
-            </div>
-            <label class="field-label" for="subpathInput">Subfolder (optional)</label>
-            <input type="text" id="subpathInput" placeholder="e.g. Show Name/Season 1">
-            <span class="hint">Files are written to: &lt;base path&gt;/&lt;destination&gt;/&lt;subfolder&gt;/&lt;file&gt;.</span>
-        </div>
-
-        <div class="section">
             <h2>Files</h2>
             <label class="dropzone" for="fileInput" id="dropLabel">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -259,6 +245,20 @@
             <div id="fileList"></div>
         </div>
 
+        <div class="section">
+            <h2>Destination</h2>
+            <label class="field-label" for="destinationSelect">Destination</label>
+            <select id="destinationSelect">
+                <option value="">Loading destinations...</option>
+            </select>
+            <div id="customDestinationRow">
+                <input type="text" id="customDestination" placeholder="Custom relative path (e.g. movies/My Movie (2024))">
+            </div>
+            <label class="field-label" for="subpathInput">Subfolder (optional)</label>
+            <input type="text" id="subpathInput" placeholder="e.g. Show Name/Season 1">
+            <span class="hint">Files are written to: &lt;base path&gt;/&lt;destination&gt;/&lt;subfolder&gt;/&lt;file&gt;.</span>
+        </div>
+
         <div id="progressContainer">
             <div class="progress-track">
                 <progress id="progressBar" value="0" max="100"></progress>
@@ -266,7 +266,7 @@
             <div id="progressText">0%</div>
         </div>
 
-        <button id="uploadButton" class="upload-btn">Start Upload</button>
+        <button id="uploadButton" class="upload-btn">Upload</button>
 
         <div id="status"></div>
     </div>
